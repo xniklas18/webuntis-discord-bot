@@ -1,0 +1,27 @@
+{
+  "name": "webuntis-discord-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --ignore 'timetable*.json' --exec ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/deep-diff": "^1.0.5",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^22.13.5",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "deep-diff": "^1.0.2",
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.4.7",
+    "lodash": "^4.17.21",
+    "webuntis": "^2.2.1"
+  }
+}
