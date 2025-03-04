@@ -19,27 +19,6 @@ function subjectNames(subject: string): string {
   return subjectMap[subject] || subject;
 }
 
-function teacherName(teacher: string, pronoun?: boolean): string {
-  if (pronoun) {
-    const teacherMap: { [key: string]: string } = {
-      "MEYE": "Herr Meyer",
-      "GROD": "Herr Grodtke",
-      "HUEB": "Frau Hübner",
-    };
-
-    return teacherMap[teacher] || teacher;
-  }
-
-  const teacherMap: { [key: string]: string } = {
-    "MEYE": "Meyer",
-    "GROD": "Grodtke",
-    "HUEB": "Hübner",
-  };
-
-  return teacherMap[teacher] || teacher;
-}
-
-
 function mergeLessons(lessons: Lesson[]): Lesson[] {
   const mergedLessons: Lesson[] = [];
 
@@ -81,4 +60,4 @@ function untisTimeToTimeString(time: any): String {
   return `${hours}:${minutes}`;
 }
 
-export { mergeLessons, untisDateToDateString, untisTimeToTimeString, subjectNames, teacherName };
+export { mergeLessons, untisDateToDateString, untisTimeToTimeString, subjectNames };
