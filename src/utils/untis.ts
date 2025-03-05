@@ -19,6 +19,34 @@ function subjectNames(subject: string): string {
   return subjectMap[subject] || subject;
 }
 
+function teacherNames(id: number, long?: boolean): string {
+  const teacherMap: { [key: number]: { name: string, longname: string } } = {
+    39: { name: "MEYE", longname: "Herr Meyer" },
+    323: { name: "GROD", longname: "Frau Grodtke" },
+    184: { name: "HUEB", longname: "Herr Hübner" },
+    59: { name: "SOMM", longname: "Frau Sommer" },
+    2: { name: "AYDO", longname: "Frau Aydogan" },
+    223: { name: "KARA", longname: "Frau Karabelen" },
+    28: { name: "HE", longname: "Herr Heßbrüggen" },
+    130: { name: "BLAT", longname: "Herr Blatt" },
+    35: { name: "LUCK", longname: "Frau Lucke" },
+    26: { name: "HAM", longname: "Frau Hampe" },
+    383: { name: "GUSI", longname: "Herr Gusinde" },
+    65: { name: "TRA", longname: "Herr Trachte" },
+    233: { name: "WALC", longname: "Frau Walczak" },
+    42: { name: "MIS", longname: "Frau Michels" },
+    18: { name: "KUNZ", longname: "Frau Kunze" },
+    85: { name: "JANS", longname: "Herr Jansen" },
+    64: { name: "SWF", longname: "Frau Schwenzfeier-Diedrich" },
+    57: { name: "SILE", longname: "Frau Sile" },
+    69: { name: "WEB", longname: "Frau Weber" },
+    378: { name: "CHLE", longname: "Herr Chlebusch" }
+  };
+
+  const teacher = teacherMap[id];
+  return teacher ? (long ? teacher.longname : teacher.name) : "";
+}
+
 function mergeLessons(lessons: Lesson[]): Lesson[] {
   const mergedLessons: Lesson[] = [];
 
@@ -60,4 +88,4 @@ function untisTimeToTimeString(time: any): String {
   return `${hours}:${minutes}`;
 }
 
-export { mergeLessons, untisDateToDateString, untisTimeToTimeString, subjectNames };
+export { mergeLessons, untisDateToDateString, untisTimeToTimeString, subjectNames, teacherNames };
