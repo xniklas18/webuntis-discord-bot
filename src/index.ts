@@ -35,7 +35,17 @@ let previousState: any = null;
 async function watchForChanges() {
   await untis.login();
 
+
+
   setInterval(async () => {
+    if (await untis.validateSession()) {
+      console.log('Still valid session');
+    } else {
+      console.error('Session invalid');
+      await untis.login();
+
+    }
+
     const today = new Date();
     const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
     const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7));
@@ -56,9 +66,8 @@ async function watchForChanges() {
             const lesson = currentState[path[0]];
             if (lesson && lesson.te && lesson.te[0] && lesson.te[0].orgname && lesson.te[0].orgid) {
               const lessonKey = `${lesson.su[0].id}-${lesson.te[0].orgid}-${lesson.date}-${lesson.startTime}-${lesson.endTime}`;
-              embedTitle = `**${subjectNames(lesson.su[0].name)} von ${teacherName(lesson.te[0].orgname, true)}**`;
               if (!changesMap[lessonKey]) {
-                changesMap[lessonKey] = `${untisDateToDateString(lesson.date)}\n${untisTimeToTimeString(lesson.startTime)} - ${untisTimeToTimeString(lesson.endTime)}\n${lesson.substText}`;
+                changesMap[lessonKey] = `${subjectNames(lesson.su[0].name)} von ${teacherName(lesson.te[0].name), true}\n${untisDateToDateString(lesson.date)}\n${untisTimeToTimeString(lesson.startTime)} - ${untisTimeToTimeString(lesson.endTime)}\n${lesson.substText}`;
               }
             }
           }
@@ -72,7 +81,7 @@ async function watchForChanges() {
         const channel = client.channels.cache.get(channelId) as TextChannel;
         if (channel) {
           const embed = new EmbedBuilder()
-            .setTitle(embedTitle)
+            .setTitle("Stundenplanänderung")
             .setDescription(changesDescription)
             .setTimestamp()
             .setColor("Purple");
