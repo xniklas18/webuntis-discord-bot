@@ -5,7 +5,8 @@ import { EmbedBuilder, TextChannel } from 'discord.js';
 import { Client } from 'discord.js';
 import { diff, Diff } from 'deep-diff';
 
-import { mergeLessons, untisDateToDateString, untisTimeToTimeString, subjectNames, teacherNames } from './utils/untis';
+import { mergeLessons, untisDateToDateString, untisTimeToTimeString, subjectNames, teacherNames, untisDateToDate } from './utils/untis';
+import { discordTimestamp } from './utils/discord';
 
 const SCHOOL = process.env.WEBUNTIS_SCHOOL || '';
 const USERNAME = process.env.WEBUNTIS_USERNAME || '';
@@ -45,8 +46,8 @@ export async function watchForChanges() {
     const today = new Date();
     const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
     const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7));
-    const currentState = mergeLessons(await untis.getOwnClassTimetableForRange(startOfWeek, endOfWeek)); // * For production
-    // const currentState = JSON.parse(fs.readFileSync('timetable_changing.json', 'utf8')); // * For testing
+    // const currentState = mergeLessons(await untis.getOwnClassTimetableForRange(startOfWeek, endOfWeek)); // * For production
+    const currentState = JSON.parse(fs.readFileSync('timetable_changing.json', 'utf8')); // * For testing
     previousState = JSON.parse(fs.readFileSync('timetable_static.json', 'utf8')); // * For testing
 
     const differences = diff(previousState, currentState);
@@ -64,7 +65,16 @@ export async function watchForChanges() {
             if (lesson && lesson.te && lesson.te[0] && lesson.te[0].orgname && lesson.te[0].orgid) {
               const lessonKey = `${lesson.su[0].id}-${lesson.te[0].orgid}-${lesson.date}-${lesson.startTime}-${lesson.endTime}`;
               if (!changesMap[lessonKey]) {
-                changesMap[lessonKey] = `${subjectNames(lesson.su[0].name)} von ${teacherNames(lesson.te[0].orgid, true)}\n${untisDateToDateString(lesson.date)}\n${untisTimeToTimeString(lesson.startTime)} - ${untisTimeToTimeString(lesson.endTime)}\n${lesson.substText}`;
+
+                const startDate = untisDateToDate(lesson.date);
+                startDate.setHours(Math.floor(lesson.startTime / 100));
+                startDate.setMinutes(lesson.startTime % 100);
+
+                const endDate = untisDateToDate(lesson.date);
+                endDate.setHours(Math.floor(lesson.endTime / 100));
+                endDate.setMinutes(lesson.endTime % 100);
+
+                changesMap[lessonKey] = `${subjectNames(lesson.su[0].name)} von ${teacherNames(lesson.te[0].orgid, true)}\n${discordTimestamp(startDate, 'long date day short time')} - ${discordTimestamp(endDate, 'short time')}\n${lesson.substText}`;
               }
             }
           }
@@ -74,8 +84,8 @@ export async function watchForChanges() {
       const changesDescription = Object.values(changesMap).join('\n\n');
 
       if (changesDescription) {
-        const channelId = process.env.CHANNEL_ID || ''; // * For production
-        // const channelId = process.env.TESTING_CHANNEL_ID || ''; // * For testing
+        // const channelId = process.env.CHANNEL_ID || ''; // * For production
+        const channelId = process.env.TESTING_CHANNEL_ID || ''; // * For testing
         const channel = client.channels.cache.get(channelId) as TextChannel;
         if (channel) {
           const embed = new EmbedBuilder()

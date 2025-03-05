@@ -14,4 +14,28 @@ function getUserMention(name: string): string {
   }
 }
 
-export { getUserMention };
+type DiscordTimestampFormat = 'relative' | 'short time' | 'long time' | 'short date' | 'long date' | 'long date day short time';
+
+function discordTimestamp(date: Date, format: DiscordTimestampFormat): string {
+  const timestamp = date.toISOString();
+  const [datePart, timePart] = timestamp.split('T');
+  const [year, month, day] = datePart.split('-');
+  const [hour, minute, second] = timePart.split(':');
+
+  switch (format) {
+    case 'relative':
+      return `<t:${Math.floor(date.getTime() / 1000)}:R>`;
+    case 'short time':
+      return `<t:${Math.floor(date.getTime() / 1000)}:t>`;
+    case 'long time':
+      return `<t:${Math.floor(date.getTime() / 1000)}:T>`;
+    case 'short date':
+      return `<t:${Math.floor(date.getTime() / 1000)}:d>`;
+    case 'long date':
+      return `<t:${Math.floor(date.getTime() / 1000)}:D>`;
+    case 'long date day short time':
+      return `<t:${Math.floor(date.getTime() / 1000)}:F>`
+  }
+}
+
+export { getUserMention, discordTimestamp };

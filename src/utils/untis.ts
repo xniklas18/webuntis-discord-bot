@@ -88,4 +88,12 @@ function untisTimeToTimeString(time: any): String {
   return `${hours}:${minutes}`;
 }
 
-export { mergeLessons, untisDateToDateString, untisTimeToTimeString, subjectNames, teacherNames };
+function untisDateToDate(date: any) {
+  const dateString = date.toString();
+  const year = dateString.substring(0, 4);
+  const month = dateString.substring(4, 6);
+  const day = dateString.substring(6, 8);
+  return new Date(`${year}-${month}-${day}`);
+}
+
+export { mergeLessons, untisDateToDateString, untisTimeToTimeString, untisDateToDate, subjectNames, teacherNames };
