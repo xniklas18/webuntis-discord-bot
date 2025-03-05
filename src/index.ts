@@ -5,7 +5,7 @@ import { EmbedBuilder, TextChannel } from 'discord.js';
 import { Client } from 'discord.js';
 import { diff, Diff } from 'deep-diff';
 
-import { mergeLessons, untisDateToDateString, untisTimeToTimeString, subjectNames, teacherNames, untisDateToDate } from './utils/untis';
+import { mergeLessons, subjectNames, teacherNames, untisDateToDate } from './utils/untis';
 import { discordTimestamp } from './utils/discord';
 
 const SCHOOL = process.env.WEBUNTIS_SCHOOL || '';
