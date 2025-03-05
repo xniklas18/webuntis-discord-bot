@@ -46,9 +46,9 @@ export async function watchForChanges() {
     const today = new Date();
     const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
     const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7));
-    // const currentState = mergeLessons(await untis.getOwnClassTimetableForRange(startOfWeek, endOfWeek)); // * For production
-    const currentState = JSON.parse(fs.readFileSync('timetable_changing.json', 'utf8')); // * For testing
-    previousState = JSON.parse(fs.readFileSync('timetable_static.json', 'utf8')); // * For testing
+    const currentState = mergeLessons(await untis.getOwnClassTimetableForRange(startOfWeek, endOfWeek)); // * For production
+    // const currentState = JSON.parse(fs.readFileSync('timetable_changing.json', 'utf8')); // * For testing
+    // previousState = JSON.parse(fs.readFileSync('timetable_static.json', 'utf8')); // * For testing
 
     const differences = diff(previousState, currentState);
 
@@ -101,7 +101,7 @@ export async function watchForChanges() {
     } else {
       console.log('No changes detected');
     }
-  }, 10 * 1000);
+  }, 30 * 1000);
 }
 
 client.login(TOKEN);
