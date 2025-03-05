@@ -1,0 +1,100 @@
+{
+  "CH": {
+    "MEYE": {
+      "Monday": ["Niklas", "Oskar", "Oktus"],
+      "Wednesday": ["Niklas", "Oskar", "Oktus"]
+    }
+  },
+  "PL": {
+    "GROD": {
+      "Wednesday": ["Niklas", "Oskar"],
+      "Friday": ["Niklas", "Oskar"]
+    }
+  },
+  "PH": {
+    "HUEB": {
+      "Tuesday": ["Tim", "Oktus"],
+      "Wednesday": ["Niklas", "Oskar"],
+      "Thursday": ["Tim", "Oktus"],
+      "Friday": ["Niklas", "Oskar"]
+    }
+  },
+  "MU": {
+    "SWF": {
+      "Tuesday": ["Niklas", "Oskar"],
+      "Thursday": ["Niklas", "Oskar"]
+    },
+    "JANS": {
+      "Tuesday": ["Tim", "Oktus"],
+      "Thursday": ["Tim", "Oktus"]
+    }
+  },
+  "E": {
+    "HE": {
+      "Wednesday": ["Niklas", "Oskar"],
+      "Thursday": ["Niklas", "Oskar"]
+    },
+    "KARA": {
+      "Friday": ["Tim", "Oktus"],
+      "Wednesday": ["Tim", "Oktus"]
+    }
+  },
+  "D": {
+    "SCHE": {
+      "Monday": ["Niklas", "Tim"],
+      "Thursday": ["Niklas", "Tim"]
+    },
+    "BEY": {
+      "Monday": ["Oskar", "Oktus"],
+      "Thursday": ["Oskar", "Oktus"]
+    }
+  },
+  "IF": {
+    "KOHL": {
+      "Monday": ["Niklas", "Oskar", "Tim", "Oktus"],
+      "Thursday": ["Niklas", "Oskar", "Tim", "Oktus"]
+    }
+  },
+  "SW": {
+    "GUSI": {
+      "Monday": ["Niklas", "Oskar", "Tim", "Oktus"],
+      "Wednesday": ["Niklas", "Oskar", "Tim", "Oktus"]
+    }
+  },
+  "SP": {
+    "MAND": {
+      "Monday": ["Niklas", "Tim", "Oktus"],
+      "Tuesday": ["Niklas", "Tim", "Oktus"]
+    },
+    "WERN": {
+      "Monday": ["Oskar"],
+      "Tuesday": ["Oskar"]
+    }
+  },
+  "EK": {
+    "LUCK": {
+      "Tuesday": ["Niklas", "Oskar"],
+      "Thursday": ["Niklas", "Oskar"]
+    },
+    "BLAT": {
+      "Wednesday": ["Tim", "Oktus"],
+      "Thursday": ["Tim", "Oktus"]
+    }
+  },
+  "M": {
+    "FOER": {
+      "Thursday": ["Niklas", "Oskar", "Tim"],
+      "Friday": ["Niklas", "Oskar", "Tim"]
+    },
+    "GANS": {
+      "Tuesday": ["Oktus"],
+      "Thursday": ["Oktus"]
+    }
+  },
+  "S11": {
+    "WEB": {
+      "Wednesday": ["Tim"],
+      "Friday": ["Tim"]
+    }
+  }
+}

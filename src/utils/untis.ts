@@ -1,6 +1,9 @@
 import { Lesson } from "webuntis";
+import * as fs from 'fs';
 
-function subjectNames(subject: string): string {
+const teacherMap = JSON.parse(fs.readFileSync('src/data/teachers.json', 'utf8'));
+
+function subjectName(subject: string): string {
   const subjectMap: { [key: string]: string } = {
     "M": "Mathe",
     "CH": "Chemie",
@@ -14,35 +17,13 @@ function subjectNames(subject: string): string {
     "MU": "Musik",
     "BI": "Biologie",
     "IF": "Informatik",
+    "S11": "Spanisch"
   };
 
   return subjectMap[subject] || subject;
 }
 
-function teacherNames(id: number, long?: boolean): string {
-  const teacherMap: { [key: number]: { name: string, longname: string } } = {
-    39: { name: "MEYE", longname: "Herr Meyer" },
-    323: { name: "GROD", longname: "Frau Grodtke" },
-    184: { name: "HUEB", longname: "Herr Hübner" },
-    59: { name: "SOMM", longname: "Frau Sommer" },
-    2: { name: "AYDO", longname: "Frau Aydogan" },
-    223: { name: "KARA", longname: "Frau Karabelen" },
-    28: { name: "HE", longname: "Herr Heßbrüggen" },
-    130: { name: "BLAT", longname: "Herr Blatt" },
-    35: { name: "LUCK", longname: "Frau Lucke" },
-    26: { name: "HAM", longname: "Frau Hampe" },
-    383: { name: "GUSI", longname: "Herr Gusinde" },
-    65: { name: "TRA", longname: "Herr Trachte" },
-    233: { name: "WALC", longname: "Frau Walczak" },
-    42: { name: "MIS", longname: "Frau Michels" },
-    18: { name: "KUNZ", longname: "Frau Kunze" },
-    85: { name: "JANS", longname: "Herr Jansen" },
-    64: { name: "SWF", longname: "Frau Schwenzfeier-Diedrich" },
-    57: { name: "SILE", longname: "Frau Sile" },
-    69: { name: "WEB", longname: "Frau Weber" },
-    378: { name: "CHLE", longname: "Herr Chlebusch" }
-  };
-
+function teacherName(id: number, long?: boolean): string {
   const teacher = teacherMap[id];
   return teacher ? (long ? teacher.longname : teacher.name) : "";
 }
@@ -67,8 +48,6 @@ function mergeLessons(lessons: Lesson[]): Lesson[] {
 
   return mergedLessons;
 }
-
-
 
 function untisDateToDateString(date: any): String {
   const dateString = date.toString();
@@ -96,4 +75,4 @@ function untisDateToDate(date: any) {
   return new Date(`${year}-${month}-${day}`);
 }
 
-export { mergeLessons, untisDateToDateString, untisTimeToTimeString, untisDateToDate, subjectNames, teacherNames };
+export { mergeLessons, untisDateToDateString, untisTimeToTimeString, untisDateToDate, subjectName, teacherName };
