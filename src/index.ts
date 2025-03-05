@@ -46,9 +46,9 @@ export async function watchForChanges() {
     const today = new Date();
     const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
     const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7));
-    // const currentState = mergeLessons(await untis.getOwnClassTimetableForRange(startOfWeek, endOfWeek)); // * For production
-    const currentState = JSON.parse(fs.readFileSync('timetable_changing.json', 'utf8')); // * For testing
-    previousState = JSON.parse(fs.readFileSync('timetable_static.json', 'utf8')); // * For testing
+    const currentState = mergeLessons(await untis.getOwnClassTimetableForRange(startOfWeek, endOfWeek)); // * For production
+    // const currentState = JSON.parse(fs.readFileSync('timetable_changing.json', 'utf8')); // * For testing
+    // previousState = JSON.parse(fs.readFileSync('timetable_static.json', 'utf8')); // * For testing
 
     const differences = diff(previousState, currentState);
 
@@ -84,8 +84,8 @@ export async function watchForChanges() {
       const changesDescription = Object.values(changesMap).join('\n\n');
 
       if (changesDescription) {
-        // const channelId = process.env.CHANNEL_ID || ''; // * For production
-        const channelId = process.env.TESTING_CHANNEL_ID || ''; // * For testing
+        const channelId = process.env.CHANNEL_ID || ''; // * For production
+        // const channelId = process.env.TESTING_CHANNEL_ID || ''; // * For testing
         const channel = client.channels.cache.get(channelId) as TextChannel;
         if (channel) {
           const embed = new EmbedBuilder()
