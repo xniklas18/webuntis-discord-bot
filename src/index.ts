@@ -66,16 +66,8 @@ export async function watchForChanges() {
               const lessonKey = `${lesson.su[0].id}-${lesson.te[0].orgid}-${lesson.date}-${lesson.startTime}-${lesson.endTime}`;
               if (!changesMap[lessonKey]) {
 
-                const startDate = untisDateToDate(lesson.date);
-                startDate.setHours(Math.floor(lesson.startTime / 100));
-                startDate.setMinutes(lesson.startTime % 100);
-
-                const endDate = untisDateToDate(lesson.date);
-                endDate.setHours(Math.floor(lesson.endTime / 100));
-                endDate.setMinutes(lesson.endTime % 100);
-
                 const mentions = getMentionsForLesson(lesson);
-                changesMap[lessonKey] = `${subjectName(lesson.su[0].name)} von ${teacherName(lesson.te[0].orgid, true)}\n${discordTimestamp(startDate, 'long date day short time')} - ${discordTimestamp(endDate, 'short time')}\n${lesson.substText}\n${mentions}`;
+                changesMap[lessonKey] = `${subjectName(lesson.su[0].name)} von ${teacherName(lesson.te[0].orgid, true)}\n${discordTimestamp(untisDateToDate(lesson.date), 'long date')} ${untisTimeToTimeString(lesson.startTime)} - ${untisTimeToTimeString(lesson.endTime)}\n${lesson.substText}\n${mentions}`;
               }
             }
           }
