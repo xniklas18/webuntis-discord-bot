@@ -2,24 +2,9 @@ import { Lesson } from "webuntis";
 import * as fs from 'fs';
 
 const teacherMap = JSON.parse(fs.readFileSync('src/data/teachers.json', 'utf8'));
+const subjectMap = JSON.parse(fs.readFileSync('src/data/subjects.json', 'utf8'));
 
 function subjectName(subject: string): string {
-  const subjectMap: { [key: string]: string } = {
-    "M": "Mathe",
-    "CH": "Chemie",
-    "PH": "Physik",
-    "D": "Deutsch",
-    "E": "Englisch",
-    "PL": "Philosophie",
-    "KU": "Kunst",
-    "SP": "Sport",
-    "GE": "Geschichte",
-    "MU": "Musik",
-    "BI": "Biologie",
-    "IF": "Informatik",
-    "S11": "Spanisch"
-  };
-
   return subjectMap[subject] || subject;
 }
 

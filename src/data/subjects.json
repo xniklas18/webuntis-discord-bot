@@ -1,0 +1,21 @@
+{
+  "M": "Mathe",
+  "CH": "Chemie",
+  "PH": "Physik",
+  "D": "Deutsch",
+  "E": "Englisch",
+  "PL": "Philosophie",
+  "KU": "Kunst",
+  "SP": "Sport",
+  "GE": "Geschichte",
+  "MU": "Musik",
+  "BI": "Biologie",
+  "IF": "Informatik",
+  "SW": "Sowi",
+  "S11": "Spanisch",
+  "PA": "Pädagogik",
+  "ER": "Evang. Religion",
+  "KR": "Kath. Religion",
+  "L7": "Latein",
+  "F7": "Französisch"
+}
