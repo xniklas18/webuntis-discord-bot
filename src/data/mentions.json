@@ -96,5 +96,17 @@
       "Wednesday": ["Tim"],
       "Friday": ["Tim"]
     }
+  },
+  "ER": {
+    "HAM": {
+      "Wednesday": ["Tim"],
+      "Friday": ["Tim"]
+    }
+  },
+  "KR": {
+    "MIS": {
+      "Wednesday": ["Oktus"],
+      "Friday": ["Oktus"]
+    }
   }
 }
