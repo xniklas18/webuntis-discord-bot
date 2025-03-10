@@ -18,5 +18,19 @@
   "64": { "name": "SWF", "longname": "Frau Schwenzfeier-Diedrich" },
   "57": { "name": "SILE", "longname": "Frau Sile" },
   "69": { "name": "WEB", "longname": "Frau Weber" },
-  "378": { "name": "CHLE", "longname": "Herr Chlebusch" }
+  "378": { "name": "CHLE", "longname": "Herr Chlebusch" },
+  "54": { "name": "SCHE", "longname": "Herr Schewe" },
+  "72": { "name": "KOHL", "longname": "Frau Kohlrausch-Schneider" },
+  "210": { "name": "GANS", "longname": "Frau Gans" },
+  "249": { "name": "MAND", "longname": "Herr Mandera" },
+  "388": { "name": "WERN", "longname": "Herr Werner" },
+  "181": { "name": "HAHN", "longname": "Frau Hahn" },
+  "9": { "name": "BRS", "longname": "Frau Brandt" },
+  "51": { "name": "RETT", "longname": "Frau Rettich" },
+  "34": { "name": "KRO", "longname": "Herr Kröger" },
+  "23": { "name": "GRE", "longname": "Frau Greif" },
+  "20": { "name": "GOD", "longname": "Herr Gode" },
+  "10": { "name": "CHW", "longname": "Frau Chwolka" },
+  "67": { "name": "VOEL", "longname": "Herr Völker" },
+  "73": { "name": "FRIA", "longname": "Frau Fritz" }
 }
