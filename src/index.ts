@@ -39,6 +39,7 @@ export async function watchForChanges() {
     if (await untis.validateSession()) {
       console.log('Still valid session');
     } else {
+      await untis.logout();
       console.error('Session invalid');
       await untis.login();
     }
