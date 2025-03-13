@@ -1,8 +1,12 @@
 import { Lesson } from "webuntis";
-import * as fs from 'fs';
+import * as fs from "fs";
 
-const teacherMap = JSON.parse(fs.readFileSync('src/data/teachers.json', 'utf8'));
-const subjectMap = JSON.parse(fs.readFileSync('src/data/subjects.json', 'utf8'));
+const teacherMap = JSON.parse(
+  fs.readFileSync("src/data/teachers.json", "utf8"),
+);
+const subjectMap = JSON.parse(
+  fs.readFileSync("src/data/subjects.json", "utf8"),
+);
 
 function subjectName(subject: string): string {
   return subjectMap[subject] || subject;
@@ -16,15 +20,19 @@ function teacherName(id: number, long?: boolean): string {
 function mergeLessons(lessons: Lesson[]): Lesson[] {
   const mergedLessons: Lesson[] = [];
 
-  lessons.forEach(lesson => {
-    const existingLesson = mergedLessons.find(l =>
-      l.su[0].name === lesson.su[0].name &&
-      l.te[0].name === lesson.te[0].name &&
-      l.date === lesson.date
+  lessons.forEach((lesson) => {
+    const existingLesson = mergedLessons.find(
+      (l) =>
+        l.su[0].name === lesson.su[0].name &&
+        l.te[0].name === lesson.te[0].name &&
+        l.date === lesson.date,
     );
 
     if (existingLesson) {
-      existingLesson.startTime = Math.min(existingLesson.startTime, lesson.startTime);
+      existingLesson.startTime = Math.min(
+        existingLesson.startTime,
+        lesson.startTime,
+      );
       existingLesson.endTime = Math.max(existingLesson.endTime, lesson.endTime);
     } else {
       mergedLessons.push({ ...lesson });
@@ -45,7 +53,7 @@ function untisDateToDateString(date: any): String {
 function untisTimeToTimeString(time: any): String {
   let timeString = time.toString();
   if (timeString.length === 3) {
-    timeString = '0' + timeString;
+    timeString = "0" + timeString;
   }
   const hours = timeString.substring(0, 2);
   const minutes = timeString.substring(2, 4);
@@ -60,4 +68,11 @@ function untisDateToDate(date: any) {
   return new Date(`${year}-${month}-${day}`);
 }
 
-export { mergeLessons, untisDateToDateString, untisTimeToTimeString, untisDateToDate, subjectName, teacherName };
+export {
+  mergeLessons,
+  untisDateToDateString,
+  untisTimeToTimeString,
+  untisDateToDate,
+  subjectName,
+  teacherName,
+};
