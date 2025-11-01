@@ -4,8 +4,11 @@ process.env.WEBUNTIS_SCHOOL = 'test-school';
 process.env.WEBUNTIS_USERNAME = 'test-user';
 process.env.WEBUNTIS_PASSWORD = 'test-pass';
 process.env.WEBUNTIS_BASEURL = 'test-url';
-process.env.CLIENT_TOKEN = 'test-token';
-process.env.CHANNEL_ID = 'test-channel-id';
+
+// Use real Discord credentials for integration testing
+// These are loaded from the .env file automatically by dotenv
+// process.env.CLIENT_TOKEN is already set from .env
+// process.env.TESTING_CHANNEL_ID is already set from .env
 
 // Increase test timeout for integration tests
-jest.setTimeout(10000);
+jest.setTimeout(15000);
