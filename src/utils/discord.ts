@@ -1,12 +1,12 @@
-import { Lesson } from "webuntis";
-import { untisDateToDate } from "./untis";
+import { Lesson } from 'webuntis';
+import { untisDateToDate } from './untis';
 import * as fs from 'fs';
 
 const userIds: { [key: string]: string } = {
   Niklas: '1189654002456088608',
   Oskar: '751795379737067580',
   Tim: '799952102536773672',
-  Oktus: '1179376377590468670'
+  Oktus: '1179376377590468670',
 };
 
 const mentions = JSON.parse(fs.readFileSync('src/data/mentions.json', 'utf8'));
@@ -20,27 +20,30 @@ function getUserMention(name: string): string {
   }
 }
 
-type DiscordTimestampFormat = 'relative' | 'short time' | 'long time' | 'short date' | 'long date' | 'long date day short time';
+type DiscordTimestampFormat =
+  | 'relative'
+  | 'short time'
+  | 'long time'
+  | 'short date'
+  | 'long date'
+  | 'long date day short time';
 
 function discordTimestamp(date: Date, format: DiscordTimestampFormat): string {
-  const timestamp = date.toISOString();
-  const [datePart, timePart] = timestamp.split('T');
-  const [year, month, day] = datePart.split('-');
-  const [hour, minute, second] = timePart.split(':');
+  const unixTimestamp = Math.floor(date.getTime() / 1000);
 
   switch (format) {
     case 'relative':
-      return `<t:${Math.floor(date.getTime() / 1000)}:R>`;
+      return `<t:${unixTimestamp}:R>`;
     case 'short time':
-      return `<t:${Math.floor(date.getTime() / 1000)}:t>`;
+      return `<t:${unixTimestamp}:t>`;
     case 'long time':
-      return `<t:${Math.floor(date.getTime() / 1000)}:T>`;
+      return `<t:${unixTimestamp}:T>`;
     case 'short date':
-      return `<t:${Math.floor(date.getTime() / 1000)}:d>`;
+      return `<t:${unixTimestamp}:d>`;
     case 'long date':
-      return `<t:${Math.floor(date.getTime() / 1000)}:D>`;
+      return `<t:${unixTimestamp}:D>`;
     case 'long date day short time':
-      return `<t:${Math.floor(date.getTime() / 1000)}:F>`;
+      return `<t:${unixTimestamp}:F>`;
   }
 }
 

@@ -9,7 +9,9 @@ async function main() {
   const BASEURL = process.env.WEBUNTIS_BASEURL || '';
 
   if (!SCHOOL || !USERNAME || !PASSWORD || !BASEURL) {
-    console.error('Missing one of WEBUNTIS_SCHOOL, WEBUNTIS_USERNAME, WEBUNTIS_PASSWORD or WEBUNTIS_BASEURL in environment.');
+    console.error(
+      'Missing one of WEBUNTIS_SCHOOL, WEBUNTIS_USERNAME, WEBUNTIS_PASSWORD or WEBUNTIS_BASEURL in environment.'
+    );
     process.exit(2);
   }
 
@@ -42,7 +44,9 @@ async function main() {
       }
     }
 
-    const teachers = Array.from(teachersMap.values()).sort((a, b) => (a.display || '').localeCompare(b.display || ''));
+    const teachers = Array.from(teachersMap.values()).sort((a, b) =>
+      (a.display || '').localeCompare(b.display || '')
+    );
 
     console.log('Found teachers in next two weeks:');
     for (const t of teachers) {
@@ -54,9 +58,14 @@ async function main() {
 
     await untis.logout();
     process.exit(0);
-  } catch (err: any) {
-    console.error('Error while fetching teachers:', err && err.message ? err.message : err);
-    try { await untis.logout(); } catch (_) { }
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error('Error while fetching teachers:', errorMessage);
+    try {
+      await untis.logout();
+    } catch {
+      // Ignore logout errors during error handling
+    }
     process.exit(1);
   }
 }
@@ -65,4 +74,4 @@ if (require.main === module) {
   main();
 }
 
-export { };
+export {};

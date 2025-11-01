@@ -2,19 +2,19 @@
  * ============================================================================
  * INTEGRATION TEST FOR MAIN FUNCTIONALITY
  * ============================================================================
- * 
+ *
  * PURPOSE:
  * This test suite ONLY tests the main watchForChanges() function which is
  * responsible for:
  *   1. Reading timetable data from WebUntis
  *   2. Detecting differences between old and new timetables
  *   3. Sending notifications to Discord when changes are found
- * 
+ *
  * TESTING APPROACH:
  * - WebUntis API: MOCKED (we control the data it returns)
  * - Discord API: REAL (actually sends messages to TESTING_CHANNEL_ID)
  * - Utility functions: NOT tested separately (used as-is)
- * 
+ *
  * WHY REAL DISCORD?
  * To verify that the actual Discord integration works end-to-end, including:
  * - Client connection
@@ -26,6 +26,7 @@
 
 import { watchForChanges, resetPreviousState } from '../../src/index';
 import { Client, GatewayIntentBits } from 'discord.js';
+import { Lesson } from 'webuntis';
 
 // Tell Jest to replace WebUntis with a mock version
 jest.mock('webuntis');
@@ -38,8 +39,8 @@ describe('Main Functionality Integration Test', () => {
   // TEST VARIABLES
   // ============================================================================
   let mockUntisClient: jest.Mocked<WebUntis>; // Fake WebUntis client
-  let realDiscordClient: Client;              // Real Discord client
-  let isDiscordReady: boolean = false;        // Track if Discord connected
+  let realDiscordClient: Client; // Real Discord client
+  let isDiscordReady: boolean = false; // Track if Discord connected
 
   // ============================================================================
   // SETUP - RUNS ONCE BEFORE ALL TESTS
@@ -48,8 +49,8 @@ describe('Main Functionality Integration Test', () => {
     // Create a REAL Discord client that will connect to Discord
     realDiscordClient = new Client({
       intents: [
-        GatewayIntentBits.Guilds,         // Access to server (guild) info
-        GatewayIntentBits.GuildMessages,  // Access to send messages
+        GatewayIntentBits.Guilds, // Access to server (guild) info
+        GatewayIntentBits.GuildMessages, // Access to send messages
       ],
     });
 
@@ -89,10 +90,10 @@ describe('Main Functionality Integration Test', () => {
 
     // Create a mock WebUntis client with fake methods
     mockUntisClient = {
-      login: jest.fn().mockResolvedValue(undefined),           // Fake login (always succeeds)
-      validateSession: jest.fn().mockResolvedValue(true),      // Fake session check (always valid)
-      getOwnClassTimetableForRange: jest.fn(),                 // Fake timetable fetch (we'll configure this per test)
-    } as any;
+      login: jest.fn().mockResolvedValue(undefined), // Fake login (always succeeds)
+      validateSession: jest.fn().mockResolvedValue(true), // Fake session check (always valid)
+      getOwnClassTimetableForRange: jest.fn(), // Fake timetable fetch (we'll configure this per test)
+    } as unknown as jest.Mocked<WebUntis>;
 
     // Silence console output during tests to keep output clean
     jest.spyOn(console, 'log').mockImplementation();
@@ -122,12 +123,12 @@ describe('Main Functionality Integration Test', () => {
     // -------------------------------------------------------------------------
 
     // Original state: Normal lesson with teacher BUCH
-    const originalLessons: any[] = [
+    const originalLessons: Lesson[] = [
       {
         id: 1,
-        date: 20251103,           // Monday, Nov 3, 2025
-        startTime: 800,           // 08:00 (in Untis format)
-        endTime: 900,             // 09:00
+        date: 20251103, // Monday, Nov 3, 2025
+        startTime: 800, // 08:00 (in Untis format)
+        endTime: 900, // 09:00
         su: [{ id: 1, name: 'M', longname: 'Mathematik' }],
         te: [{ id: 322, orgid: 322, orgname: 'BUCH', name: 'BUCH', longname: 'Herr Buchholz' }],
         substText: '',
@@ -140,7 +141,7 @@ describe('Main Functionality Integration Test', () => {
     // Updated state: Lesson is CANCELED
     // Teacher ID becomes 0, name becomes empty
     // substText indicates "eigenverantwortliches Arbeiten" (self-study)
-    const canceledLessons: any[] = [
+    const canceledLessons: Lesson[] = [
       {
         id: 1,
         date: 20251103,
@@ -179,7 +180,7 @@ describe('Main Functionality Integration Test', () => {
     // Cycle 1 (0ms): Initial fetch (normal lesson)
     // Cycle 2 (100ms): Second fetch (canceled lesson) -> CHANGE DETECTED!
     // Cycle 3 (200ms): Third fetch (no further change)
-    await new Promise(resolve => setTimeout(resolve, 350));
+    await new Promise((resolve) => setTimeout(resolve, 350));
 
     // Stop the interval
     clearInterval(intervalId);
@@ -198,7 +199,9 @@ describe('Main Functionality Integration Test', () => {
     expect(mockUntisClient.validateSession).toHaveBeenCalled();
 
     // Verify that timetable was fetched at least 2 times
-    expect(mockUntisClient.getOwnClassTimetableForRange.mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(mockUntisClient.getOwnClassTimetableForRange.mock.calls.length).toBeGreaterThanOrEqual(
+      2
+    );
 
     // Note: We can't easily assert that Discord message was sent with real client,
     // but you should see the message appear in your testing channel!
@@ -216,7 +219,7 @@ describe('Main Functionality Integration Test', () => {
     // -------------------------------------------------------------------------
 
     // Same data returned every time (no changes)
-    const staticLessons: any[] = [
+    const staticLessons: Lesson[] = [
       {
         id: 1,
         date: 20251103,
@@ -243,7 +246,7 @@ describe('Main Functionality Integration Test', () => {
     const intervalId = await watchForChanges(mockUntisClient, realDiscordClient, 100);
 
     // Wait for at least 2 interval cycles
-    await new Promise(resolve => setTimeout(resolve, 350));
+    await new Promise((resolve) => setTimeout(resolve, 350));
 
     // Stop and cleanup
     clearInterval(intervalId);
@@ -268,11 +271,11 @@ describe('Main Functionality Integration Test', () => {
 
     // Mock session becoming invalid on the second check
     mockUntisClient.validateSession
-      .mockResolvedValueOnce(true)   // First check: session valid
+      .mockResolvedValueOnce(true) // First check: session valid
       .mockResolvedValueOnce(false); // Second check: session INVALID!
 
     // Return static timetable (no changes)
-    const staticLessons: any[] = [
+    const staticLessons: Lesson[] = [
       {
         id: 1,
         date: 20251103,
@@ -298,7 +301,7 @@ describe('Main Functionality Integration Test', () => {
     const intervalId = await watchForChanges(mockUntisClient, realDiscordClient, 100);
 
     // Wait for at least 2 cycles (so session becomes invalid)
-    await new Promise(resolve => setTimeout(resolve, 350));
+    await new Promise((resolve) => setTimeout(resolve, 350));
 
     // Cleanup
     clearInterval(intervalId);

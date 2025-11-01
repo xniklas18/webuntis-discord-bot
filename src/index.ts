@@ -1,6 +1,4 @@
-
-// Imports
-import { WebUntis } from 'webuntis';
+import { Lesson, WebUntis } from 'webuntis';
 import dotenv from 'dotenv';
 dotenv.config();
 import { EmbedBuilder, TextChannel, Client } from 'discord.js';
@@ -11,7 +9,7 @@ import {
   untisTimeToTimeString,
   subjectName,
   teacherName,
-  untisDateToDate
+  untisDateToDate,
 } from './utils/untis';
 import { discordTimestamp, getMentionsForLesson } from './utils/discord';
 
@@ -27,12 +25,7 @@ const untis = new WebUntis(SCHOOL, USERNAME, PASSWORD, BASEURL);
 
 // Discord client
 const client = new Client({
-  intents: [
-    'Guilds',
-    'GuildMembers',
-    'GuildMessages',
-    'MessageContent'
-  ],
+  intents: ['Guilds', 'GuildMembers', 'GuildMessages', 'MessageContent'],
 });
 
 client.once('ready', () => {
@@ -40,7 +33,7 @@ client.once('ready', () => {
 });
 
 // State for change detection
-let previousState: any = null;
+let previousState: Lesson[] | null = null;
 
 /**
  * Watches for timetable changes and sends Discord notifications.
@@ -85,29 +78,25 @@ export async function watchForChanges(
       // Map to store formatted change descriptions
       const changesMap: { [key: string]: string } = {};
 
-      differences.forEach((change: Diff<any, any>) => {
+      differences.forEach((change: Diff<Lesson[] | null, Lesson[]>) => {
         if (['E', 'N', 'A'].includes(change.kind)) {
           let lessonIndex: number | undefined;
 
           // Array change
           if (change.kind === 'A') {
-            lessonIndex = (change as any).index;
+            lessonIndex = (change as { kind: 'A'; index: number }).index;
           } else {
             // Edit/new change
             const path = change.path ?? [];
-            if (path.length > 0) lessonIndex = path[0];
+            if (path.length > 0) lessonIndex = path[0] as number;
           }
 
           if (lessonIndex !== undefined) {
             const lesson = currentState[lessonIndex];
-            if (
-              lesson &&
-              lesson.te && lesson.te[0] &&
-              lesson.te[0].orgname && lesson.te[0].orgid
-            ) {
+            if (lesson && lesson.te && lesson.te[0] && lesson.te[0].orgname && lesson.te[0].orgid) {
               const lessonKey = `${lesson.su[0].id}-${lesson.te[0].orgid}-${lesson.date}-${lesson.startTime}-${lesson.endTime}`;
               if (!changesMap[lessonKey]) {
-                const mentions: any[] = getMentionsForLesson(lesson);
+                const mentions: string[] = getMentionsForLesson(lesson);
                 const mentionsString = Array.isArray(mentions)
                   ? mentions.join(' ')
                   : String(mentions);
@@ -167,4 +156,3 @@ if (require.main === module) {
   client.login(TOKEN);
   watchForChanges();
 }
-
