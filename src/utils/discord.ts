@@ -1,5 +1,5 @@
 import { Lesson } from "webuntis";
-import { subjectName, untisDateToDate } from "./untis";
+import { untisDateToDate } from "./untis";
 import * as fs from 'fs';
 
 const userIds: { [key: string]: string } = {

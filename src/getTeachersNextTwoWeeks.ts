@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { WebUntis, Lesson } from 'webuntis';
-import { teacherName, untisDateToDate } from './utils/untis';
+import { teacherName } from './utils/untis';
 
 async function main() {
   const SCHOOL = process.env.WEBUNTIS_SCHOOL || '';
