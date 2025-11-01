@@ -81,7 +81,7 @@ export async function watchForChanges(untisClient = untis, discordClient = clien
                 const mentions: any[] = getMentionsForLesson(lesson);
                 const mentionsString = Array.isArray(mentions) ? mentions.join(' ') : String(mentions);
                 if (mentionsString && mentionsString.trim().length > 0) {
-                  changesMap[lessonKey] = `${subjectName(lesson.su[0].name)} von ${teacherName(lesson.te[0].orgid, true)}\n${discordTimestamp(untisDateToDate(lesson.date), 'long date')} ${untisTimeToTimeString(lesson.startTime)} - ${untisTimeToTimeString(lesson.endTime)}\n${lesson.substText}\n${mentionsString}`;
+                  changesMap[lessonKey] = `**${subjectName(lesson.su[0].name)}** • ${teacherName(lesson.te[0].orgid, true)}\n📆 ${discordTimestamp(untisDateToDate(lesson.date), 'long date')} ⏰ ${untisTimeToTimeString(lesson.startTime)} - ${untisTimeToTimeString(lesson.endTime)}\n💬 ${lesson.substText}\n\n👥 ${mentionsString}`;
                 }
               }
             }
@@ -96,10 +96,16 @@ export async function watchForChanges(untisClient = untis, discordClient = clien
         const channel = discordClient.channels.cache.get(channelId) as TextChannel;
         if (channel) {
           const embed = new EmbedBuilder()
-            .setTitle("Stundenplanänderung")
+            .setTitle("📅 Stundenplanänderung")
             .setDescription(changesDescription)
             .setTimestamp()
-            .setColor("Purple");
+            .setColor("#9b59b6") // Purple color in hex
+            .setFooter({ text: "WebUntis • Stundenplan-Bot" })
+            .setAuthor({
+              name: "Neue Änderung erkannt",
+              iconURL: "https://cdn-icons-png.flaticon.com/512/1828/1828490.png" // Bell icon
+            });
+
           channel.send({ embeds: [embed] });
         }
       }
