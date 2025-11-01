@@ -32,21 +32,21 @@ client.once('ready', () => {
 
 let previousState: any = null;
 
-export async function watchForChanges() {
-  await untis.login();
+export async function watchForChanges(untisClient = untis, discordClient = client, interval = 30 * 1000) {
+  await untisClient.login();
 
-  setInterval(async () => {
-    if (await untis.validateSession()) {
+  const intervalId = setInterval(async () => {
+    if (await untisClient.validateSession()) {
       console.log('Still valid session');
     } else {
       console.error('Session invalid');
-      await untis.login();
+      await untisClient.login();
     }
 
     const today = new Date();
     const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
     const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7));
-    const currentState = mergeLessons(await untis.getOwnClassTimetableForRange(startOfWeek, endOfWeek)); // * For production
+    const currentState = mergeLessons(await untisClient.getOwnClassTimetableForRange(startOfWeek, endOfWeek)); // * For production
     // const currentState = JSON.parse(fs.readFileSync('timetable_changing.json', 'utf8')); // * For testing
     // previousState = JSON.parse(fs.readFileSync('timetable_static.json', 'utf8')); // * For testing
 
@@ -58,10 +58,22 @@ export async function watchForChanges() {
       const changesMap: { [key: string]: string } = {};
 
       differences.forEach((change: Diff<any, any>) => {
-        if (change.kind === 'E' || change.kind === 'N') {
-          const path = change.path ?? [];
-          if (path) {
-            const lesson = currentState[path[0]];
+        if (change.kind === 'E' || change.kind === 'N' || change.kind === 'A') {
+          let lessonIndex: number | undefined;
+
+          // Handle array changes
+          if (change.kind === 'A') {
+            lessonIndex = (change as any).index;
+          } else {
+            // Handle edit/new changes
+            const path = change.path ?? [];
+            if (path.length > 0) {
+              lessonIndex = path[0];
+            }
+          }
+
+          if (lessonIndex !== undefined) {
+            const lesson = currentState[lessonIndex];
             if (lesson && lesson.te && lesson.te[0] && lesson.te[0].orgname && lesson.te[0].orgid) {
               const lessonKey = `${lesson.su[0].id}-${lesson.te[0].orgid}-${lesson.date}-${lesson.startTime}-${lesson.endTime}`;
               if (!changesMap[lessonKey]) {
@@ -81,7 +93,7 @@ export async function watchForChanges() {
 
       if (changesDescription) {
         const channelId = process.env.CHANNEL_ID || '';
-        const channel = client.channels.cache.get(channelId) as TextChannel;
+        const channel = discordClient.channels.cache.get(channelId) as TextChannel;
         if (channel) {
           const embed = new EmbedBuilder()
             .setTitle("Stundenplanänderung")
@@ -96,9 +108,17 @@ export async function watchForChanges() {
     } else {
       console.log('No changes detected');
     }
-  }, 30 * 1000);
+  }, interval);
+
+  return intervalId;
 }
 
-client.login(TOKEN);
-watchForChanges();
+export function resetPreviousState() {
+  previousState = null;
+}
+
+if (require.main === module) {
+  client.login(TOKEN);
+  watchForChanges();
+}
 
