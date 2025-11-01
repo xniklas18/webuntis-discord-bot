@@ -1,112 +1,119 @@
 {
   "CH": {
     "MEYE": {
-      "Monday": ["Niklas", "Oskar", "Oktus"],
-      "Wednesday": ["Niklas", "Oskar", "Oktus"]
+      "Tuesday": ["Niklas", "Oskar", "Oktus"],
+      "Thursday": ["Niklas", "Oskar", "Oktus"]
     }
   },
   "PL": {
-    "GROD": {
-      "Wednesday": ["Niklas", "Oskar"],
-      "Friday": ["Niklas", "Oskar"]
+    "SCHE": {
+      "Monday": ["Niklas", "Oskar"],
+      "Wednesday": ["Niklas", "Oskar"]
     }
   },
   "PH": {
-    "HUEB": {
-      "Tuesday": ["Tim", "Oktus"],
-      "Wednesday": ["Niklas", "Oskar"],
-      "Thursday": ["Tim", "Oktus"],
-      "Friday": ["Niklas", "Oskar"]
+    "FOER": {
+      "Wednesday": ["Tim", "Oskar"],
+      "Friday": ["Tim", "Oskar"]
+    },
+    "HAAR": {
+      "Thursday": ["Oktus"],
+      "Tuesday": ["Oktus"]
     }
   },
   "MU": {
-    "SWF": {
-      "Tuesday": ["Niklas", "Oskar"],
-      "Thursday": ["Niklas", "Oskar"]
-    },
-    "JANS": {
-      "Tuesday": ["Tim", "Oktus"],
-      "Thursday": ["Tim", "Oktus"]
+    "HAM": {
+      "Monday": ["Niklas", "Oskar", "Oktus", "Tim"],
+      "Thursday": ["Niklas", "Oskar", "Oktus", "Tim"]
     }
   },
   "E": {
-    "HE": {
-      "Wednesday": ["Niklas", "Oskar"],
-      "Thursday": ["Niklas", "Oskar"]
+    "CHW": {
+      "Monday": ["Niklas", "Oskar", "Oktus"],
+      "Wednesday": ["Niklas", "Oskar", "Oktus"],
+      "Thursday": ["Niklas", "Oskar", "Oktus"]
     },
-    "KARA": {
-      "Friday": ["Tim", "Oktus"],
-      "Wednesday": ["Tim", "Oktus"]
+    "HE": {
+      "Monday": ["Tim"],
+      "Wednesday": ["Tim"],
+      "Thursday": ["Tim"]
     }
   },
   "D": {
-    "SCHE": {
-      "Monday": ["Niklas", "Tim"],
-      "Thursday": ["Niklas", "Tim"]
+    "OVER": {
+      "Tuesday": ["Niklas", "Oskar"],
+      "Thursday": ["Niklas", "Oskar"]
     },
-    "BEY": {
-      "Monday": ["Oskar", "Oktus"],
-      "Thursday": ["Oskar", "Oktus"]
+    "POZD": {
+      "Thursday": ["Tim"],
+      "Friday": ["Tim"]
+    },
+    "GRUN":
+    {
+      "Wednesday": ["Oktus"],
+      "Friday": ["Oktus"]
     }
   },
   "IF": {
     "KOHL": {
-      "Monday": ["Niklas", "Oskar", "Tim", "Oktus"],
-      "Thursday": ["Niklas", "Oskar", "Tim", "Oktus"]
+      "Thursday": ["Niklas", "Oskar", "Oktus"],
+      "Friday": ["Niklas", "Oskar", "Oktus"]
     }
   },
   "SW": {
-    "GUSI": {
-      "Monday": ["Niklas", "Oskar", "Tim", "Oktus"],
-      "Wednesday": ["Niklas", "Oskar", "Tim", "Oktus"]
+    "TSCH": {
+      "Friday": ["Niklas"],
+      "Wednesday": ["Niklas"]
+    },
+    "MARR": {
+      "Thursday": ["Niklas"],
+      "Monday": ["Niklas"]
     }
   },
   "SP": {
-    "MAND": {
-      "Monday": ["Niklas", "Tim", "Oktus"],
-      "Tuesday": ["Niklas", "Tim", "Oktus"]
-    },
-    "WERN": {
-      "Monday": ["Oskar"],
-      "Tuesday": ["Oskar"]
+    "FRI": {
+      "Wednesday": ["Niklas", "Tim", "Oktus", "Oskar"],
+      "Friday": ["Niklas", "Tim", "Oktus", "Oskar"]
     }
   },
   "EK": {
-    "LUCK": {
-      "Tuesday": ["Niklas", "Oskar"],
-      "Thursday": ["Niklas", "Oskar"]
+    "SEIT": {
+      "Monday": ["Niklas", "Oskar", "Oktus"],
+      "Wednesday": ["Niklas", "Oskar", "Oktus"]
     },
-    "BLAT": {
-      "Wednesday": ["Tim", "Oktus"],
-      "Thursday": ["Tim", "Oktus"]
+    "GREI": {
+      "Monday": ["Tim"],
+      "Wednesday": ["Tim"],
+      "Friday": ["Tim"]
     }
   },
   "M": {
-    "FOER": {
-      "Thursday": ["Niklas", "Oskar", "Tim"],
-      "Friday": ["Niklas", "Oskar", "Tim"]
+    "BUCH": {
+      "Monday": ["Niklas", "Oskar", "Oktus"],
+      "Wednesday": ["Niklas", "Oskar", "Oktus"],
+      "Friday": ["Niklas", "Oskar", "Oktus"]
     },
-    "GANS": {
-      "Tuesday": ["Oktus"],
-      "Thursday": ["Oktus"]
+    "GRAL": {
+      "Tuesday": ["Tim"],
+      "Thursday": ["Tim"]
     }
   },
-  "S11": {
+  "S11GK1": {
     "WEB": {
       "Wednesday": ["Tim"],
-      "Friday": ["Tim"]
+      "Tuesday": ["Tim"]
     }
   },
   "ER": {
     "HAM": {
-      "Wednesday": ["Tim"],
-      "Friday": ["Tim"]
+      "Monday": ["Tim"],
+      "Wednesday": ["Tim"]
     }
   },
   "KR": {
-    "MIS": {
-      "Wednesday": ["Oktus"],
-      "Friday": ["Oktus"]
+    "HE": {
+      "Monday": ["Oktus"],
+      "Wednesday": ["Oktus"]
     }
   }
 }
