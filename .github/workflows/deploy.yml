@@ -1,0 +1,48 @@
+name: Deploy to External Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            # Navigate to the project directory
+            cd ${{ secrets.PROJECT_PATH }}
+
+            # Pull latest changes from the repository
+            git pull origin main
+
+            # Install/update dependencies
+            npm install
+
+            # Build the project
+            npm run build
+
+            # Restart the bot service
+            # Option 1: Using PM2 (if installed)
+            if command -v pm2 &> /dev/null; then
+              pm2 restart webuntis-discord-bot || \
+                pm2 start dist/index.js --name webuntis-discord-bot
+            # Option 2: Using systemd service (if configured)
+            elif systemctl is-active --quiet webuntis-discord-bot; then
+              sudo systemctl restart webuntis-discord-bot
+            # Option 3: Kill existing process and restart
+            else
+              pkill -f "node dist/index.js" || true
+              nohup npm start > bot.log 2>&1 &
+            fi
+
+            echo "Deployment completed successfully!"
