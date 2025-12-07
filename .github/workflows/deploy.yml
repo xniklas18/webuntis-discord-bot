@@ -17,7 +17,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          port: ${{ secrets.SERVER_PORT }}
           script: |
             # Navigate to the project directory
             cd ${{ secrets.PROJECT_PATH }}
@@ -34,7 +34,7 @@ jobs:
             # Restart the bot service
             # Option 1: Using PM2 (if installed)
             if command -v pm2 &> /dev/null; then
-              pm2 restart webuntis-discord-bot || \
+              pm2 reload webuntis-discord-bot || \
                 pm2 start dist/index.js --name webuntis-discord-bot
             # Option 2: Using systemd service (if configured)
             elif systemctl is-active --quiet webuntis-discord-bot; then
