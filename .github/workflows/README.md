@@ -23,12 +23,12 @@ The deployment workflow automatically:
 On your local machine or a secure environment:
 
 ```bash
-ssh-keygen -t ed25519 -C "github-actions-deploy" -f github-actions-key
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/github-deploy
 ```
 
 This creates two files:
-- `github-actions-key` (private key)
-- `github-actions-key.pub` (public key)
+- `~/.ssh/github-deploy` (private key)
+- `~/.ssh/github-deploy.pub` (public key)
 
 ### 2. Configure Your External Server
 
@@ -125,7 +125,7 @@ In your GitHub repository, go to **Settings → Secrets and variables → Action
 |-------------|-------------|---------|
 | `SERVER_HOST` | IP address or hostname of your server | `192.168.1.100` or `example.com` |
 | `SERVER_USERNAME` | SSH username for your server | `ubuntu` or `root` |
-| `SSH_PRIVATE_KEY` | Private SSH key content | Content of `github-actions-key` file |
+| `SSH_PRIVATE_KEY` | Private SSH key content | Content of `~/.ssh/github-deploy` file |
 | `SERVER_PORT` | SSH port (optional, defaults to 22) | `22` |
 | `PROJECT_PATH` | Absolute path to project on server | `/home/ubuntu/webuntis-discord-bot` |
 
@@ -165,7 +165,7 @@ If you get permission errors:
 2. For systemd restart, add the user to sudoers without password for that specific command:
    ```bash
    # Add this line to /etc/sudoers using visudo
-   your_username ALL=(ALL) NOPASSWD: /bin/systemctl restart webuntis-discord-bot
+   your_username ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart webuntis-discord-bot
    ```
 
 ### Build or Installation Failures

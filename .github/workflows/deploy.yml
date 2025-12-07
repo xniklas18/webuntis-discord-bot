@@ -35,6 +35,7 @@ jobs:
 
             # Restart the bot service
             # Option 1: Using PM2 (if installed)
+            # reload provides zero-downtime restart
             if command -v pm2 &> /dev/null; then
               pm2 reload webuntis-discord-bot || \
                 pm2 start dist/index.js --name webuntis-discord-bot

@@ -28,7 +28,7 @@ Copy your public key to the server:
 
 ```bash
 # Method 1: Using ssh-copy-id (easiest)
-ssh-copy-id -i ~/.ssh/github-deploy.pub user@your-server.com
+ssh-copy-id -i ~/.ssh/github-deploy.pub YOUR_USERNAME@YOUR_SERVER_IP
 
 # Method 2: Manual
 cat ~/.ssh/github-deploy.pub
