@@ -1,4 +1,4 @@
-import { Lesson, WebUntis } from 'webuntis';
+import { Homework, Lesson, WebUntis } from 'webuntis';
 import dotenv from 'dotenv';
 dotenv.config();
 import { EmbedBuilder, TextChannel, Client } from 'discord.js';
@@ -34,6 +34,7 @@ client.once('ready', () => {
 
 // State for change detection
 let previousState: Lesson[] | null = null;
+let previousHomeworkIds: Set<number> | null = null;
 
 /**
  * Watches for timetable changes and sends Discord notifications.
@@ -68,6 +69,56 @@ export async function watchForChanges(
     const currentState = mergeLessons(
       await untisClient.getOwnClassTimetableForRange(startOfWeek, endOfWeek)
     );
+
+    // Detect newly assigned homework (the first fetch only establishes a baseline).
+    if (typeof untisClient.getHomeWorksFor === 'function') {
+      const currentHomeworks: Homework[] = await untisClient.getHomeWorksFor(
+        startOfWeek,
+        endOfWeek
+      );
+      const currentHomeworkIds = new Set(currentHomeworks.map((homework) => homework.id));
+      const newHomeworks =
+        previousHomeworkIds === null
+          ? []
+          : currentHomeworks.filter(
+              (homework) => !homework.completed && !previousHomeworkIds?.has(homework.id)
+            );
+
+      if (newHomeworks.length > 0) {
+        const homeworkDescription = newHomeworks
+          .map((homework) => {
+            const lesson = currentState.find((entry) => entry.id === homework.lessonId);
+            const subject = lesson?.su?.[0]?.name
+              ? subjectName(lesson.su[0].name)
+              : 'Hausaufgabe';
+            const dueDate = homework.dueDate
+              ? untisDateToDate(homework.dueDate).toLocaleDateString('de-DE')
+              : 'kein Abgabedatum';
+            const details = homework.remark?.trim()
+              ? `\n_${homework.remark.trim()}_`
+              : '';
+
+            return `**${subject}** • Abgabe: ${dueDate}\n${homework.text || 'Keine Aufgabenbeschreibung'}${details}`;
+          })
+          .join('\n\n')
+          .slice(0, 4000);
+
+        const channelId = process.env.CHANNEL_ID || '';
+        const channel = discordClient.channels.cache.get(channelId) as TextChannel;
+        if (channel) {
+          const embed = new EmbedBuilder()
+            .setTitle(newHomeworks.length === 1 ? '📚 Neue Hausaufgabe' : '📚 Neue Hausaufgaben')
+            .setDescription(homeworkDescription)
+            .setTimestamp()
+            .setColor('#3498db')
+            .setFooter({ text: 'WebUntis • Hausaufgaben' });
+
+          await channel.send({ embeds: [embed] });
+        }
+      }
+
+      previousHomeworkIds = currentHomeworkIds;
+    }
 
     // Detect changes
     const differences = diff(previousState, currentState);
@@ -149,6 +200,7 @@ export async function watchForChanges(
  */
 export function resetPreviousState() {
   previousState = null;
+  previousHomeworkIds = null;
 }
 
 // Run bot if executed directly
