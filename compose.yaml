@@ -1,0 +1,7 @@
+services:
+  webuntis-discord-bot:
+    build: .
+    container_name: webuntis-discord-bot
+    env_file:
+      - .env
+    restart: unless-stopped
