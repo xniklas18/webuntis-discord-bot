@@ -1,7 +1,7 @@
 import { Lesson, WebUntis } from 'webuntis';
 import dotenv from 'dotenv';
 dotenv.config();
-import { EmbedBuilder, TextChannel, Client } from 'discord.js';
+import { AttachmentBuilder, EmbedBuilder, TextChannel, Client } from 'discord.js';
 import { diff, Diff } from 'deep-diff';
 
 import {
@@ -12,6 +12,8 @@ import {
   untisDateToDate,
 } from './utils/untis';
 import { discordTimestamp, getMentionsForLesson } from './utils/discord';
+import { getLinkedAccount } from './userStore';
+import { NotifyPayload, startUserManagementWeb } from './web';
 
 // Environment variables
 const SCHOOL = process.env.WEBUNTIS_SCHOOL || '';
@@ -145,6 +147,30 @@ export async function watchForChanges(
 }
 
 /**
+ * Sends a notification from the Schulassistent website as a direct message.
+ * With payload.userId it goes to that user (only if linked), otherwise to NOTIFY_USER_ID.
+ */
+async function sendOwnerNotification(payload: NotifyPayload): Promise<void> {
+  const userId = payload.userId || process.env.NOTIFY_USER_ID;
+  if (!userId) throw new Error('Kein Empfänger');
+  if (payload.userId && !(await getLinkedAccount(payload.userId))) throw new Error('Empfänger nicht verbunden');
+  const user = await client.users.fetch(userId);
+  const embed = new EmbedBuilder()
+    .setTitle(payload.title)
+    .setDescription(payload.text)
+    .setColor('#5865f2')
+    .setTimestamp();
+  if (payload.link) embed.setURL(payload.link);
+  await user.send({
+    embeds: [embed],
+    files: payload.pdf
+      ? [new AttachmentBuilder(payload.pdf, { name: payload.filename || 'datei.pdf' })]
+      : [],
+    allowedMentions: { parse: [] },
+  });
+}
+
+/**
  * Resets the previous state for change detection.
  */
 export function resetPreviousState() {
@@ -154,5 +180,6 @@ export function resetPreviousState() {
 // Run bot if executed directly
 if (require.main === module) {
   client.login(TOKEN);
-  watchForChanges();
+  void startUserManagementWeb(sendOwnerNotification);
+  watchForChanges().catch(() => console.error('WebUntis-Überwachung konnte nicht gestartet werden.'));
 }

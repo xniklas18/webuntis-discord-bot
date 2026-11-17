@@ -15,6 +15,9 @@ WORKDIR /app
 COPY --from=build --chown=node:node /app/package.json ./package.json
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
+# Die JSON-Daten (Lehrer, Fächer, Erwähnungen) werden zur Laufzeit relativ zum Arbeitsverzeichnis gelesen
+COPY --from=build --chown=node:node /app/src/data ./src/data
+RUN mkdir -p /app/data && chown node:node /app/data
 
 USER node
 CMD ["node", "dist/index.js"]

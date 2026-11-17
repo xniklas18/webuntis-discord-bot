@@ -1,0 +1,27 @@
+name: Deploy webuntis-discord-bot from master
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Check out master
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker compose --project-name webuntis-discord-bot --file compose.yaml build
+
+      - name: Remove the previous bot containers
+        run: |
+          docker rm -f webuntisbot-webuntisbot-1 || true
+          docker rm -f webuntisbot-test-webuntisbot-test-1 || true
+
+      - name: Start the bot
+        run: docker compose --project-name webuntis-discord-bot --file compose.yaml up --detach --no-build --remove-orphans
