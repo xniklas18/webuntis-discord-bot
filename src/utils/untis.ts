@@ -69,3 +69,7 @@ export {
   subjectName,
   teacherName,
 };
+
+export function displayName(item?: { longname?: string; name?: string; orgname?: string }): string {
+  return item?.longname?.trim() || item?.orgname?.trim() || item?.name?.trim() || "Unbekannt";
+}

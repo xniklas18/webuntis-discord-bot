@@ -11,7 +11,8 @@ import {
   teacherName,
   untisDateToDate,
 } from './utils/untis';
-import { discordTimestamp, getMentionsForLesson } from './utils/discord';
+import { discordTimestamp } from './utils/discord';
+import { findCourseParticipants, isEigenverantwortlichesArbeiten } from './participants';
 import { getLinkedAccount } from './userStore';
 import { NotifyPayload, startUserManagementWeb } from './web';
 
@@ -71,60 +72,66 @@ export async function watchForChanges(
       await untisClient.getOwnClassTimetableForRange(startOfWeek, endOfWeek)
     );
 
-    // Detect changes
-    const differences = diff(previousState, currentState);
+    // Detect changes (the first poll only records the state)
+    const differences = previousState === null ? undefined : diff(previousState, currentState);
 
     if (differences) {
-      console.log('Changes detected:', differences);
+      console.log('Changes detected:', differences.length);
 
-      // Map to store formatted change descriptions
-      const changesMap: { [key: string]: string } = {};
-
+      // Changed lessons, one entry per lesson
+      const changed = new Map<string, { details: string; lesson: Lesson }>();
       differences.forEach((change: Diff<Lesson[] | null, Lesson[]>) => {
-        if (['E', 'N', 'A'].includes(change.kind)) {
-          let lessonIndex: number | undefined;
+        if (!['E', 'N', 'A'].includes(change.kind)) return;
+        const lessonIndex =
+          change.kind === 'A'
+            ? (change as { kind: 'A'; index: number }).index
+            : (change.path?.[0] as number | undefined);
+        if (lessonIndex === undefined) return;
 
-          // Array change
-          if (change.kind === 'A') {
-            lessonIndex = (change as { kind: 'A'; index: number }).index;
-          } else {
-            // Edit/new change
-            const path = change.path ?? [];
-            if (path.length > 0) lessonIndex = path[0] as number;
-          }
-
-          if (lessonIndex !== undefined) {
-            const lesson = currentState[lessonIndex];
-            if (lesson && lesson.te && lesson.te[0] && lesson.te[0].orgname && lesson.te[0].orgid) {
-              const lessonKey = `${lesson.su[0].id}-${lesson.te[0].orgid}-${lesson.date}-${lesson.startTime}-${lesson.endTime}`;
-              if (!changesMap[lessonKey]) {
-                const mentions: string[] = getMentionsForLesson(lesson);
-                const mentionsString = Array.isArray(mentions)
-                  ? mentions.join(' ')
-                  : String(mentions);
-                if (mentionsString && mentionsString.trim().length > 0) {
-                  changesMap[lessonKey] =
-                    `**${subjectName(lesson.su[0].name)}** • ${teacherName(lesson.te[0].orgid, true)}\n` +
-                    `📆 ${discordTimestamp(untisDateToDate(lesson.date), 'long date')} ` +
-                    `⏰ ${untisTimeToTimeString(lesson.startTime)} - ${untisTimeToTimeString(lesson.endTime)}\n` +
-                    `💬 ${lesson.substText}\n\n👥 ${mentionsString}`;
-                }
-              }
-            }
-          }
-        }
+        const lesson = currentState[lessonIndex];
+        if (!lesson?.te?.[0]?.orgname || !lesson.te[0].orgid) return;
+        const key = `${lesson.su[0].id}-${lesson.te[0].orgid}-${lesson.date}-${lesson.startTime}-${lesson.endTime}`;
+        if (changed.has(key)) return;
+        changed.set(key, {
+          lesson,
+          details:
+            `**${subjectName(lesson.su[0].name)}** • ${teacherName(lesson.te[0].orgid, true)}\n` +
+            `📆 ${discordTimestamp(untisDateToDate(lesson.date), 'long date')} ` +
+            `⏰ ${untisTimeToTimeString(lesson.startTime)} - ${untisTimeToTimeString(lesson.endTime)}\n` +
+            `💬 ${lesson.substText || 'Änderung im Stundenplan'}`,
+        });
       });
 
-      const changesDescription = Object.values(changesMap).join('\n\n');
+      const channel = discordClient.channels.cache.get(process.env.CHANNEL_ID || '') as TextChannel | undefined;
+      if (channel && changed.size) {
+        // Only changes that affect at least one linked user are reported; only
+        // "Eigenverantwortliches Arbeiten" mentions them.
+        const usersByLesson = await findCourseParticipants(
+          [...changed.entries()].map(([key, change]) => ({ key, lesson: change.lesson })),
+          startOfWeek,
+          endOfWeek
+        );
+        const relevant = [...changed.entries()].filter(([key]) => (usersByLesson.get(key) || []).length > 0);
+        const mentionIds = [
+          ...new Set(
+            relevant
+              .filter(([, change]) => isEigenverantwortlichesArbeiten(change.lesson))
+              .flatMap(([key]) => usersByLesson.get(key) || [])
+          ),
+        ].slice(0, 100);
+        const mentionAllowlist = new Set(mentionIds);
 
-      // Send notification if there are changes
-      if (changesDescription) {
-        const channelId = process.env.CHANNEL_ID || '';
-        const channel = discordClient.channels.cache.get(channelId) as TextChannel;
-        if (channel) {
+        const descriptions = relevant.map(([key, change]) => {
+          const users = isEigenverantwortlichesArbeiten(change.lesson)
+            ? (usersByLesson.get(key) || []).filter((id) => mentionAllowlist.has(id))
+            : [];
+          return change.details + (users.length ? `\n\n👥 ${users.map((id) => `<@${id}>`).join(' ')}` : '');
+        });
+
+        if (descriptions.length) {
           const embed = new EmbedBuilder()
             .setTitle('📅 Stundenplanänderung')
-            .setDescription(changesDescription)
+            .setDescription(descriptions.join('\n\n').slice(0, 4000))
             .setTimestamp()
             .setColor('#9b59b6') // Purple
             .setFooter({ text: 'WebUntis • Stundenplan-Bot' })
@@ -133,12 +140,13 @@ export async function watchForChanges(
               iconURL: 'https://cdn-icons-png.flaticon.com/512/1828/1828490.png', // Bell icon
             });
 
-          channel.send({ embeds: [embed] });
+          await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: mentionIds } });
         }
       }
 
       previousState = currentState;
     } else {
+      if (previousState === null) previousState = currentState;
       console.log('No changes detected');
     }
   }, interval);
