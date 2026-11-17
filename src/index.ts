@@ -1,7 +1,14 @@
 import { Lesson, WebUntis } from 'webuntis';
 import dotenv from 'dotenv';
 dotenv.config();
-import { AttachmentBuilder, EmbedBuilder, TextChannel, Client } from 'discord.js';
+import {
+  AttachmentBuilder,
+  EmbedBuilder,
+  TextChannel,
+  Client,
+  MessageFlags,
+  SlashCommandBuilder,
+} from 'discord.js';
 import { diff, Diff } from 'deep-diff';
 
 import {
@@ -31,8 +38,33 @@ const client = new Client({
   intents: ['Guilds', 'GuildMembers', 'GuildMessages', 'MessageContent'],
 });
 
-client.once('ready', () => {
+const commands = [new SlashCommandBuilder().setName('ping').setDescription('Prüft, ob der Bot erreichbar ist.')];
+
+client.once('ready', async (readyClient) => {
   console.log('Discord ready!');
+  try {
+    // Replaces all global commands, so commands of the previous bot disappear
+    await readyClient.application.commands.set(commands);
+    console.log('Discord-Befehle wurden registriert.');
+  } catch (error) {
+    console.error('Discord-Befehle konnten nicht registriert werden:', error);
+  }
+});
+
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isChatInputCommand() || interaction.commandName !== 'ping') return;
+  const roundTrip = Date.now() - interaction.createdTimestamp;
+  await interaction.reply({
+    embeds: [
+      new EmbedBuilder()
+        .setTitle('🏓 Pong!')
+        .setDescription(`Bot-Latenz: **${roundTrip} ms**\nGateway: **${client.ws.ping} ms**`)
+        .setColor('#2ecc71')
+        .setTimestamp(),
+    ],
+    flags: MessageFlags.Ephemeral,
+    allowedMentions: { parse: [] },
+  });
 });
 
 // State for change detection
