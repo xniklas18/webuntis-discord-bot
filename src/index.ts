@@ -1,14 +1,7 @@
 import { Lesson, WebUntis } from 'webuntis';
 import dotenv from 'dotenv';
 dotenv.config();
-import {
-  AttachmentBuilder,
-  EmbedBuilder,
-  TextChannel,
-  Client,
-  MessageFlags,
-  SlashCommandBuilder,
-} from 'discord.js';
+import { AttachmentBuilder, EmbedBuilder, TextChannel, Client } from 'discord.js';
 import { diff, Diff } from 'deep-diff';
 
 import {
@@ -22,6 +15,8 @@ import { discordTimestamp } from './utils/discord';
 import { findCourseParticipants, isEigenverantwortlichesArbeiten } from './participants';
 import { getLinkedAccount } from './userStore';
 import { NotifyPayload, startUserManagementWeb } from './web';
+import { commands, handleInteraction } from './commands';
+import { startJobs } from './features';
 
 // Environment variables
 const SCHOOL = process.env.WEBUNTIS_SCHOOL || '';
@@ -38,8 +33,6 @@ const client = new Client({
   intents: ['Guilds', 'GuildMembers', 'GuildMessages', 'MessageContent'],
 });
 
-const commands = [new SlashCommandBuilder().setName('ping').setDescription('Prüft, ob der Bot erreichbar ist.')];
-
 client.once('ready', async (readyClient) => {
   console.log('Discord ready!');
   try {
@@ -51,20 +44,8 @@ client.once('ready', async (readyClient) => {
   }
 });
 
-client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isChatInputCommand() || interaction.commandName !== 'ping') return;
-  const roundTrip = Date.now() - interaction.createdTimestamp;
-  await interaction.reply({
-    embeds: [
-      new EmbedBuilder()
-        .setTitle('🏓 Pong!')
-        .setDescription(`Bot-Latenz: **${roundTrip} ms**\nGateway: **${client.ws.ping} ms**`)
-        .setColor('#2ecc71')
-        .setTimestamp(),
-    ],
-    flags: MessageFlags.Ephemeral,
-    allowedMentions: { parse: [] },
-  });
+client.on('interactionCreate', (interaction) => {
+  handleInteraction(interaction, client).catch(() => console.error('Interaktion fehlgeschlagen.'));
 });
 
 // State for change detection
@@ -221,5 +202,6 @@ export function resetPreviousState() {
 if (require.main === module) {
   client.login(TOKEN);
   void startUserManagementWeb(sendOwnerNotification);
+  startJobs(client);
   watchForChanges().catch(() => console.error('WebUntis-Überwachung konnte nicht gestartet werden.'));
 }

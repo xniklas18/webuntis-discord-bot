@@ -2,6 +2,11 @@ import { randomBytes, createCipheriv, createDecipheriv } from 'node:crypto';
 import { chmod, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+export interface Prefs {
+  morning?: boolean;
+  reminder?: boolean;
+}
+
 export interface LinkedAccount {
   discordUserId: string;
   school: string;
@@ -11,6 +16,8 @@ export interface LinkedAccount {
   connectedAt: string;
   completedHomeworkIds?: number[];
   courseModes?: Record<string, 'oral' | 'written'>;
+  /** DM switches, both off by default */
+  prefs?: Prefs;
 }
 
 const dataFile = process.env.USER_DATA_FILE || '/app/data/users.json';
@@ -107,6 +114,18 @@ export async function setHomeworkCompleted(
 export async function removeLinkedAccount(discordUserId: string): Promise<void> {
   const operation = writeChain.then(async () => {
     const accounts = (await readAccounts()).filter((entry) => entry.discordUserId !== discordUserId);
+    await writeAccounts(accounts);
+  });
+  writeChain = operation.catch(() => undefined);
+  await operation;
+}
+
+export async function setPrefs(discordUserId: string, prefs: Prefs): Promise<void> {
+  const operation = writeChain.then(async () => {
+    const accounts = await readAccounts();
+    const account = accounts.find((entry) => entry.discordUserId === discordUserId);
+    if (!account) throw new Error('Linked account not found');
+    account.prefs = { ...account.prefs, ...prefs };
     await writeAccounts(accounts);
   });
   writeChain = operation.catch(() => undefined);

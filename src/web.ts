@@ -1,12 +1,12 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import express, { Request, Response } from 'express';
-import session, { Session } from 'express-session';
+import cookieSession from 'cookie-session';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { WebUntis } from 'webuntis';
-import { encryptPassword, getCompletedHomeworkIds, getLinkedAccount, removeLinkedAccount, saveLinkedAccount, setHomeworkCompleted } from './userStore';
+import { encryptPassword, getCompletedHomeworkIds, getLinkedAccount, removeLinkedAccount, saveLinkedAccount, setHomeworkCompleted, setPrefs } from './userStore';
 
-type WebSession = Session & {
+type WebSession = {
   discordUser?: { id: string; username: string };
   oauthState?: string;
   csrfToken?: string;
@@ -29,13 +29,13 @@ function page(title: string, body: string): string {
 }
 
 function formToken(req: Request): string {
-  const authSession = req.session as WebSession;
+  const authSession = req.session as unknown as WebSession;
   authSession.csrfToken ||= randomBytes(32).toString('hex');
   return authSession.csrfToken;
 }
 
 function requireUser(req: Request, res: Response): string | undefined {
-  const authSession = req.session as WebSession;
+  const authSession = req.session as unknown as WebSession;
   if (!authSession.discordUser) {
     res.redirect(BASE + '/');
     return undefined;
@@ -44,7 +44,7 @@ function requireUser(req: Request, res: Response): string | undefined {
 }
 
 function requireCsrf(req: Request, res: Response): boolean {
-  const authSession = req.session as WebSession;
+  const authSession = req.session as unknown as WebSession;
   const submitted = typeof req.body.csrfToken === 'string' ? req.body.csrfToken : '';
   if (!authSession.csrfToken || !secureEquals(authSession.csrfToken, submitted)) {
     res.status(403).send(page('Sitzung abgelaufen', '<p>Bitte lade die Seite neu und versuche es erneut.</p>'));
@@ -138,30 +138,32 @@ export async function startUserManagementWeb(onNotify?: (payload: NotifyPayload)
   }
 
   app.use(express.urlencoded({ extended: false, limit: '10kb' }));
-  app.use(session({
+  app.use(cookieSession({
     name: '__Host-webuntisbot',
-    secret: sessionSecret,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { httpOnly: true, secure: true, sameSite: 'lax', path: '/', maxAge: 12 * 60 * 60 * 1000 },
+    keys: [sessionSecret],
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 12 * 60 * 60 * 1000,
   }));
   const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 20, standardHeaders: true, legacyHeaders: false });
   router.use('/auth', authLimiter);
   router.use('/webuntis', rateLimit({ windowMs: 15 * 60 * 1000, limit: 8, standardHeaders: true, legacyHeaders: false }));
 
   router.get('/style.css', (_req, res) => {
-    res.type('text/css').send('*{box-sizing:border-box}body{font:16px/1.5 system-ui,sans-serif;background:#10131a;color:#e8ebf2;margin:0;padding:1rem}main{max-width:560px;margin:1rem auto;background:#1b202b;border-radius:16px;padding:1.5rem}h1{font-size:1.6rem;line-height:1.25;margin:0 0 1rem}p{margin:.6rem 0}a{color:#9aa8ff}.btn,button{display:inline-block;font:inherit;line-height:1.2;text-align:center;color:#fff;background:#5865f2;padding:.75rem 1.1rem;border:0;border-radius:10px;text-decoration:none;cursor:pointer}.btn-ghost{background:#2f3748}.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}.actions form{display:contents}.actions .btn,.actions button{width:100%}@media(min-width:480px){.actions .btn,.actions button{width:auto}}input{display:block;width:100%;margin:.4rem 0 1rem;padding:.75rem;border-radius:8px;border:1px solid #586174;background:#10131a;color:#fff;font:inherit}label{display:block}small,footer{color:#aeb6c5}footer{margin-top:1.5rem;font-size:.85rem}.notice{padding:1rem;background:#252c3a;border-radius:10px}.notice p:first-child{margin-top:0}');
+    res.type('text/css').send('*{box-sizing:border-box}body{font:16px/1.5 system-ui,sans-serif;background:#10131a;color:#e8ebf2;margin:0;padding:1rem}main{max-width:560px;margin:1rem auto;background:#1b202b;border-radius:16px;padding:1.5rem}h1{font-size:1.6rem;line-height:1.25;margin:0 0 1rem}p{margin:.6rem 0}a{color:#9aa8ff}.btn,button{display:inline-block;font:inherit;line-height:1.2;text-align:center;color:#fff;background:#5865f2;padding:.75rem 1.1rem;border:0;border-radius:10px;text-decoration:none;cursor:pointer}.btn-ghost{background:#2f3748}.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}.actions form{display:contents}.actions .btn,.actions button{width:100%}@media(min-width:480px){.actions .btn,.actions button{width:auto}}input[type=checkbox]{display:inline-block;width:auto;margin:0 .5rem 0 0}input{display:block;width:100%;margin:.4rem 0 1rem;padding:.75rem;border-radius:8px;border:1px solid #586174;background:#10131a;color:#fff;font:inherit}label{display:block}small,footer{color:#aeb6c5}footer{margin-top:1.5rem;font-size:.85rem}.notice{padding:1rem;background:#252c3a;border-radius:10px}.notice p:first-child{margin-top:0}');
   });
 
   router.get('/', (req, res) => {
-    const authSession = req.session as WebSession;
+    const authSession = req.session as unknown as WebSession;
     if (authSession.discordUser) return res.redirect(BASE + '/konto');
     res.type('html').send(page('WebUntis-Konto verbinden',
       '<p>Verbinde dein WebUntis-Konto sicher mit deinem Discord-Benutzer.</p><div class="actions"><a class="btn" href="/bot-settings/auth/discord">Mit Discord anmelden</a></div>'));
   });
 
   router.get('/auth/discord', (req, res) => {
-    const authSession = req.session as WebSession;
+    const authSession = req.session as unknown as WebSession;
     authSession.oauthState = randomBytes(32).toString('hex');
     const authorization = new URL('https://discord.com/oauth2/authorize');
     authorization.searchParams.set('response_type', 'code');
@@ -173,7 +175,7 @@ export async function startUserManagementWeb(onNotify?: (payload: NotifyPayload)
   });
 
   router.get('/auth/discord/callback', async (req, res) => {
-    const authSession = req.session as WebSession;
+    const authSession = req.session as unknown as WebSession;
     const state = typeof req.query.state === 'string' ? req.query.state : '';
     const code = typeof req.query.code === 'string' ? req.query.code : '';
     const issuer = typeof req.query.iss === 'string' ? req.query.iss : 'https://discord.com';
@@ -223,11 +225,11 @@ export async function startUserManagementWeb(onNotify?: (payload: NotifyPayload)
     const discordUserId = requireUser(req, res);
     if (!discordUserId) return;
     try {
-      const authSession = req.session as WebSession;
+      const authSession = req.session as unknown as WebSession;
       const account = await getLinkedAccount(discordUserId);
       const token = formToken(req);
       const linked = account
-        ? `<div class="notice"><p>Verbunden mit Discord: <strong>${escapeHtml(authSession.discordUser?.username || '')}</strong></p><p>WebUntis-Schule: ${escapeHtml(account.school)} · Benutzername: ${escapeHtml(account.username)}</p><div class="actions"><form method="post" action="/bot-settings/webuntis/trennen"><input type="hidden" name="csrfToken" value="${token}"><button class="btn-ghost" type="submit">WebUntis-Konto trennen</button></form></div></div>`
+        ? `<div class="notice"><p>Verbunden mit Discord: <strong>${escapeHtml(authSession.discordUser?.username || '')}</strong></p><p>WebUntis-Schule: ${escapeHtml(account.school)} · Benutzername: ${escapeHtml(account.username)}</p><form method="post" action="/bot-settings/einstellungen"><input type="hidden" name="csrfToken" value="${token}"><p>Direktnachrichten (standardmäßig aus):</p><label><input type="checkbox" name="morning" ${account.prefs?.morning ? 'checked' : ''}> Morgen-Zusammenfassung um 6:30</label><label><input type="checkbox" name="reminder" ${account.prefs?.reminder ? 'checked' : ''}> Hausaufgaben-Erinnerung um 17:00</label><div class="actions"><button type="submit">Speichern</button></div></form><div class="actions"><form method="post" action="/bot-settings/webuntis/trennen"><input type="hidden" name="csrfToken" value="${token}"><button class="btn-ghost" type="submit">WebUntis-Konto trennen</button></form></div></div>`
         : `<p>Angemeldet als Discord: <strong>${escapeHtml(authSession.discordUser?.username || '')}</strong></p><form method="post" action="/bot-settings/webuntis/verbinden"><input type="hidden" name="csrfToken" value="${token}"><label>WebUntis-Schule<input name="school" required maxlength="100" autocomplete="organization" placeholder="Schulname in WebUntis"></label><label>WebUntis-Server<input name="baseUrl" required maxlength="120" placeholder="z. B. xyz.webuntis.com"></label><label>WebUntis-Benutzername<input name="username" required maxlength="120" autocomplete="username"></label><label>WebUntis-Passwort<input type="password" name="password" required maxlength="256" autocomplete="current-password"></label><button type="submit">Anmelden und Konto verbinden</button></form><p class="notice">Dein Passwort wird beim Speichern mit AES-256-GCM verschlüsselt. Es wird nicht im Browser oder in Logs gespeichert.</p>`;
       res.type('html').send(page('Dein WebUntis-Konto', linked + '<div class="actions"><a class="btn btn-ghost" href="/bot-settings/auth/logout">Abmelden</a></div>'));
     } catch {
@@ -265,6 +267,18 @@ export async function startUserManagementWeb(onNotify?: (payload: NotifyPayload)
     }
   });
 
+  router.post('/einstellungen', async (req, res) => {
+    const discordUserId = requireUser(req, res);
+    if (!discordUserId || !requireCsrf(req, res)) return;
+    try {
+      if (!(await getLinkedAccount(discordUserId))) return res.redirect(BASE + '/konto');
+      await setPrefs(discordUserId, { morning: req.body.morning === 'on', reminder: req.body.reminder === 'on' });
+      res.redirect(BASE + '/konto');
+    } catch {
+      res.status(500).send(page('Fehler', '<p>Die Einstellungen konnten nicht gespeichert werden.</p>'));
+    }
+  });
+
   router.post('/webuntis/trennen', async (req, res) => {
     const discordUserId = requireUser(req, res);
     if (!discordUserId || !requireCsrf(req, res)) return;
@@ -277,10 +291,8 @@ export async function startUserManagementWeb(onNotify?: (payload: NotifyPayload)
   });
 
   router.get('/auth/logout', (req, res) => {
-    req.session.destroy(() => {
-      res.clearCookie('__Host-webuntisbot', { httpOnly: true, secure: true, sameSite: 'lax', path: '/' });
-      res.redirect(BASE + '/');
-    });
+    req.session = null;
+    res.redirect(BASE + '/');
   });
 
   app.use(BASE, router);
